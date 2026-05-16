@@ -1,0 +1,844 @@
+openapi: 3.0.0
+info:
+  title: منصة معادلات الهندسة - API
+  description: |
+    توثيق كامل لجميع نقاط النهاية (endpoints) الخاصة بمنصة معادلات الهندسة.
+    
+    ## المصادقة
+    معظم المسارات تتطلب **JWT Bearer Token** يُرسل في header:
+    ```
+    Authorization: Bearer <access_token>
+    ```
+    
+    ## الأدوار
+    - **student** — طالب
+    - **employee** — موظف
+    - **admin** — مدير
+  version: 1.0.0
+  contact:
+    name: منصة معادلات الهندسة
+servers:
+  - url: http://localhost:5000
+    description: خادم التطوير المحلي
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [student, employee, admin]
+        status:
+          type: string
+          enum: [pending, active, rejected]
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        cover_image_url:
+          type: string
+        is_active:
+          type: boolean
+
+    Purchase:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+        book_id:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, rejected]
+        requested_at:
+          type: string
+          format: date-time
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        cover_image_url:
+          type: string
+        is_active:
+          type: boolean
+        coming_soon:
+          type: boolean
+
+    Settings:
+      type: object
+      properties:
+        whatsapp_number:
+          type: string
+        support_phone:
+          type: string
+        support_email:
+          type: string
+        platform_name:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+paths:
+  # ============================================================
+  # Health Check
+  # ============================================================
+  /health:
+    get:
+      tags:
+        - System
+      summary: فحص حالة السيرفر
+      responses:
+        '200':
+          description: السيرفر يعمل بشكل طبيعي
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+
+  # ============================================================
+  # Auth Routes — /api/auth
+  # ============================================================
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: تسجيل طالب جديد
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - full_name
+                - email
+                - password
+                - national_id
+              properties:
+                full_name:
+                  type: string
+                  example: أحمد محمد علي
+                email:
+                  type: string
+                  example: ahmed@example.com
+                password:
+                  type: string
+                  example: MyPassword123
+                national_id:
+                  type: string
+                  example: "12345678901234"
+                id_card_image:
+                  type: string
+                  format: binary
+                  description: صورة البطاقة الشخصية
+      responses:
+        '201':
+          description: تم التسجيل بنجاح، في انتظار الموافقة
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: بيانات غير صحيحة أو الإيميل مسجل مسبقاً
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: تسجيل الدخول
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: admin@example.com
+                password:
+                  type: string
+                  example: MyPassword123
+      responses:
+        '200':
+          description: تسجيل دخول ناجح
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: بيانات خاطئة
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: تجديد الـ Access Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: تم تجديد التوكن
+        '401':
+          description: توكن منتهي أو غير صالح
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: تسجيل الخروج
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: تم تسجيل الخروج
+
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: طلب إعادة تعيين كلمة المرور
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: تم إرسال رابط الإعادة على الإيميل
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: إعادة تعيين كلمة المرور
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                new_password:
+                  type: string
+      responses:
+        '200':
+          description: تم تغيير كلمة المرور
+
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: بيانات المستخدم الحالي
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: بيانات المستخدم
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: غير مصرح
+
+  # ============================================================
+  # Books Routes — /api/books
+  # ============================================================
+  /api/books:
+    get:
+      tags:
+        - Books
+      summary: قائمة الكتب المتاحة (عامة)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة الكتب
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+
+    post:
+      tags:
+        - Books
+      summary: إضافة كتاب جديد (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - price
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                cover_image:
+                  type: string
+                  format: binary
+                book_file:
+                  type: string
+                  format: binary
+                  description: ملف الـ PDF
+      responses:
+        '201':
+          description: تم إضافة الكتاب
+
+  /api/books/all:
+    get:
+      tags:
+        - Books
+      summary: كل الكتب (موظف/أدمن فقط)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: كل الكتب بما فيها غير المتاحة
+
+  /api/books/{id}/read:
+    get:
+      tags:
+        - Books
+      summary: الحصول على رابط قراءة الكتاب (طالب اشترى فقط)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: رابط مؤقت للقراءة
+        '403':
+          description: لم تشترِ هذا الكتاب بعد
+
+  /api/books/{id}:
+    put:
+      tags:
+        - Books
+      summary: تعديل كتاب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                is_active:
+                  type: boolean
+      responses:
+        '200':
+          description: تم التعديل
+
+    delete:
+      tags:
+        - Books
+      summary: حذف كتاب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم الحذف
+
+  # ============================================================
+  # Purchases Routes — /api/purchases
+  # ============================================================
+  /api/purchases:
+    post:
+      tags:
+        - Purchases
+      summary: طلب شراء كتاب (طالب)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: تم إرسال طلب الشراء
+
+  /api/purchases/my:
+    get:
+      tags:
+        - Purchases
+      summary: مشترياتي (طالب)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة مشتريات الطالب
+
+  /api/purchases/pending:
+    get:
+      tags:
+        - Purchases
+      summary: الطلبات المعلقة (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة طلبات الشراء المعلقة
+
+  /api/purchases/all:
+    get:
+      tags:
+        - Purchases
+      summary: كل طلبات الشراء (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: كل الطلبات
+
+  /api/purchases/{id}/confirm:
+    put:
+      tags:
+        - Purchases
+      summary: تأكيد طلب شراء (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم تأكيد الطلب
+
+  /api/purchases/{id}/reject:
+    put:
+      tags:
+        - Purchases
+      summary: رفض طلب شراء (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم رفض الطلب
+
+  # ============================================================
+  # Users Routes — /api/users
+  # ============================================================
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: قائمة الطلاب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة الطلاب
+
+  /api/users/pending:
+    get:
+      tags:
+        - Users
+      summary: الطلاب المعلقين (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: طلاب في انتظار الموافقة
+
+  /api/users/{id}/approve:
+    put:
+      tags:
+        - Users
+      summary: قبول طالب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم القبول
+
+  /api/users/{id}/reject:
+    put:
+      tags:
+        - Users
+      summary: رفض طالب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم الرفض
+
+  /api/users/{id}/reset-password:
+    put:
+      tags:
+        - Users
+      summary: إعادة تعيين باسورد الطالب (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم إعادة التعيين
+
+  /api/users/employees:
+    get:
+      tags:
+        - Users
+      summary: قائمة الموظفين (أدمن فقط)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة الموظفين
+
+    post:
+      tags:
+        - Users
+      summary: إضافة موظف جديد (أدمن فقط)
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - full_name
+                - email
+                - password
+              properties:
+                full_name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: تم إضافة الموظف
+
+  /api/users/employees/{id}:
+    put:
+      tags:
+        - Users
+      summary: تعديل موظف (أدمن فقط)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم التعديل
+
+    delete:
+      tags:
+        - Users
+      summary: حذف موظف (أدمن فقط)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم الحذف
+
+  /api/users/admins:
+    get:
+      tags:
+        - Users
+      summary: قائمة الأدمنز (أدمن فقط)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: قائمة الأدمنز
+
+    post:
+      tags:
+        - Users
+      summary: إضافة أدمن جديد (أدمن فقط)
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: تم إضافة الأدمن
+
+  /api/users/admins/{id}:
+    delete:
+      tags:
+        - Users
+      summary: حذف أدمن (أدمن فقط)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: تم الحذف
+
+  # ============================================================
+  # Settings Routes — /api/settings
+  # ============================================================
+  /api/settings:
+    get:
+      tags:
+        - Settings
+      summary: الحصول على إعدادات المنصة (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: إعدادات المنصة
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+    put:
+      tags:
+        - Settings
+      summary: تعديل إعدادات المنصة (أدمن فقط)
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+      responses:
+        '200':
+          description: تم تحديث الإعدادات
+
+  # ============================================================
+  # Courses Routes — /api/courses
+  # ============================================================
+  /api/courses:
+    get:
+      tags:
+        - Courses
+      summary: قائمة الكورسات (عامة)
+      responses:
+        '200':
+          description: قائمة الكورسات
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+
+    post:
+      tags:
+        - Courses
+      summary: إضافة كورس جديد (موظف/أدمن)
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                cover_image:
+                  type: string
+                  format: binary
+                is_active:
+                  type: boolean
+                coming_soon:
+                  type: boolean
+      responses:
+        '201':
+          description: تم إضافة الكورس

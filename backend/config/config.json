@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "engadmin",
+    "password": "engpassword",
+    "database": "engineering_platform",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "engadmin",
+    "password": "engpassword",
+    "database": "engineering_platform",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "engadmin",
+    "password": "engpassword",
+    "database": "engineering_platform",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  }
+}
