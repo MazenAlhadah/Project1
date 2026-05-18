@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 
 const ADMIN_NAV = [
   { href: '/admin/join-requests', label: 'طلبات الانضمام', icon: '📋' },
-  { href: '/admin/payment-confirmations', label: 'تأكيد المدفوعات', icon: '💳' },
+  { href: '/admin/payment-confirmations', label: 'تفعيل الكتب للطلاب', icon: '💳' },
+  { href: '/admin/courses', label: 'إدارة الكورسات', icon: '🎓' },
   { href: '/admin/books', label: 'إدارة الكتب', icon: '📚' },
   { href: '/admin/users', label: 'بيانات الطلاب', icon: '👥' },
   { href: '/admin/employees', label: 'إدارة الموظفين', icon: '👔' },

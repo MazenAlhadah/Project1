@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
+  experimental: {
+    serverComponentsExternalPackages: ['sequelize', 'pg', 'pg-hstore', 'bcryptjs'],
+  },
   async headers() {
     return [
       {

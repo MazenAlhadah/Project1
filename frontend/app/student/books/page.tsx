@@ -36,8 +36,8 @@ export default function StudentBooksPage() {
       setBooks(prev => prev.map(b => b.id === book.id ? { ...b, purchase_requested: true } : b));
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'حدث خطأ';
-      if (msg.includes('بالفعل')) {
-        const waMsg = encodeURIComponent(`أريد شراء كتاب: ${book.title}`);
+      if (msg.includes('بالفعل') || msg.includes('الانتظار')) {
+        const waMsg = encodeURIComponent(`أريد متابعة دفع كتاب: ${book.title}`);
         window.open(`https://wa.me/${whatsapp}?text=${waMsg}`, '_blank');
       } else toast.error(msg);
     } finally { setRequesting(null); }

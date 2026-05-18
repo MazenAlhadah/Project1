@@ -33,7 +33,9 @@ export default function ReadBookPage() {
     }, 1000);
 
     booksAPI.getReadUrl(id).then(res => {
-      setUrl(res.data.data.url);
+      // بدلاً من تحميل الملف بالكامل (Blob)، نستخدم مسار الـ Stream الجديد الذي يتيح العرض الفوري
+      const token = localStorage.getItem('access_token');
+      setUrl(`/api/books/${id}/stream?token=${token}`);
       setTitle(res.data.data.title);
       setTimeLeft(res.data.data.expires_in || 900);
 
@@ -104,7 +106,6 @@ export default function ReadBookPage() {
           src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH&zoom=page-fit`}
           style={{ width: '100%', height: '100%', border: 'none', userSelect: 'none' }}
           title={title}
-          sandbox="allow-scripts allow-same-origin"
           onContextMenu={e => e.preventDefault()}
         />
         {/* طبقة شفافة تمنع النقر المباشر على الـ PDF */}

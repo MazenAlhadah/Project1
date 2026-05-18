@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -103,6 +103,9 @@ export const settingsAPI = {
 // Courses
 export const coursesAPI = {
   getAll: () => api.get('/courses'),
+  create: (data: FormData) => api.post('/courses', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id: string, data: FormData) => api.put(`/courses/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  delete: (id: string) => api.delete(`/courses/${id}`),
 };
 
 export default api;

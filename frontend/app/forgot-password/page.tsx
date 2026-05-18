@@ -1,9 +1,24 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { authAPI } from '@/lib/api';
+import { authAPI, settingsAPI } from '@/lib/api';
+
+function SupportInfoBlock() {
+  const [phone, setPhone] = useState('01234567890');
+  useEffect(() => { settingsAPI.get().then(r => { if (r.data.data?.support_phone) setPhone(r.data.data.support_phone); }).catch(()=>{}); }, []);
+  return (
+    <div className="alert alert-info">
+      <span>📞</span>
+      <div>
+        <p style={{ fontWeight: 600, marginBottom: 8 }}>تواصل مع أحد الموظفين لإعادة تعيين كلمة السر</p>
+        <p>رقم التواصل: <strong dir="ltr">{phone}</strong></p>
+        <p style={{ marginTop: 4, fontSize: 13, color: 'var(--text-400)' }}>ساعات العمل: 9 صباحاً - 5 مساءً</p>
+      </div>
+    </div>
+  );
+}
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<'form' | 'sent'>('form');
@@ -63,14 +78,7 @@ export default function ForgotPasswordPage() {
                 </button>
               </form>
             ) : (
-              <div className="alert alert-info">
-                <span>📞</span>
-                <div>
-                  <p style={{ fontWeight: 600, marginBottom: 8 }}>تواصل مع أحد الموظفين لإعادة تعيين كلمة السر</p>
-                  <p>رقم التواصل: <strong dir="ltr">01234567890</strong></p>
-                  <p style={{ marginTop: 4, fontSize: 13, color: 'var(--text-400)' }}>ساعات العمل: 9 صباحاً - 5 مساءً</p>
-                </div>
-              </div>
+              <SupportInfoBlock />
             )}
           </>
         )}

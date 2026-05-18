@@ -6,7 +6,8 @@ import toast from 'react-hot-toast';
 
 const ADMIN_NAV = [
   { href: '/admin/join-requests', label: 'طلبات الانضمام', icon: '📋' },
-  { href: '/admin/payment-confirmations', label: 'تأكيد المدفوعات', icon: '💳' },
+  { href: '/admin/payment-confirmations', label: 'تفعيل الكتب للطلاب', icon: '💳' },
+  { href: '/admin/courses', label: 'إدارة الكورسات', icon: '🎓' },
   { href: '/admin/books', label: 'إدارة الكتب', icon: '📚' },
   { href: '/admin/users', label: 'بيانات الطلاب', icon: '👥' },
   { href: '/admin/employees', label: 'إدارة الموظفين', icon: '👔' },
@@ -36,7 +37,7 @@ export default function AdminPaymentsPage() {
 
   return (
     <DashboardLayout requiredRole="admin" navItems={ADMIN_NAV}>
-      <div className="page-header"><h1 className="page-title">تأكيد المدفوعات</h1></div>
+      <div className="page-header"><h1 className="page-title">تفعيل الكتب للطلاب</h1></div>
       {loading ? <div style={{ textAlign: 'center', padding: 60 }}><div className="spinner" style={{ margin: 'auto' }} /></div>
       : purchases.length === 0 ? <div className="empty-state"><div className="empty-state-icon">✅</div><h3>لا توجد طلبات معلقة</h3></div>
       : (
