@@ -8,7 +8,10 @@ export async function GET(req: NextRequest) {
   try {
     const settings = await Settings.findOne();
     return NextResponse.json({ success: true, data: settings || {} });
-  } catch(e) { return NextResponse.json({ success: false }, { status: 500 }); }
+  } catch(e) {
+    console.error('Settings GET error:', e);
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
 }
 
 export async function PUT(req: NextRequest) {
@@ -23,5 +26,8 @@ export async function PUT(req: NextRequest) {
       settings = await Settings.create(body);
     }
     return NextResponse.json({ success: true, message: 'تم تحديث الإعدادات', data: settings });
-  } catch(e) { return NextResponse.json({ success: false }, { status: 500 }); }
+  } catch(e) {
+    console.error('Settings PUT error:', e);
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
 }
