@@ -1,3 +1,5 @@
+require('pg');
+require('pg-hstore');
 const { Sequelize } = require('sequelize');
 const fs = require('fs');
 
