@@ -162,7 +162,7 @@ export default function ReadBookPage() {
             <span style={{ color: '#fbbf24', fontSize: 13 }}>⏱️ {formatTime(timeLeft)}</span>
           </div>
           <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', padding: '6px 12px', borderRadius: 20, fontSize: 12, color: '#f87171' }}>
-            🔒 محمي ضد السرقة
+            🔒 محمي
           </div>
         </div>
 
