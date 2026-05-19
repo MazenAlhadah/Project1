@@ -13,7 +13,6 @@ const nextConfig = {
         source: '/student/books/read/:id*',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'Content-Security-Policy', value: "default-src 'self'; frame-ancestors 'none';" },
         ],
       },
     ];
