@@ -64,7 +64,7 @@ function ResetPasswordContent() {
             {errors.confirm_password && <span className="form-error">{errors.confirm_password.message}</span>}
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? <><span className="spinner" style={{width:16,height:16}}/> جاري التغيير...</> : 'تغيير كلمة السر'}
+            {loading ? <><span className="spinner" style={{ width: 16, height: 16 }} /> جاري التغيير...</> : 'تغيير كلمة السر'}
           </button>
         </form>
       </div>
