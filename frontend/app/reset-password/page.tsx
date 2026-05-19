@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { authAPI } from '@/lib/api';
 
 interface ResetForm { new_password: string; confirm_password: string; }
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get('token');
@@ -69,5 +69,18 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0f172a', flexDirection: 'column', gap: 16 }}>
+        <div className="spinner" style={{ width: 40, height: 40 }} />
+        <p style={{ color: '#94a3b8' }}>جاري التحميل...</p>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
