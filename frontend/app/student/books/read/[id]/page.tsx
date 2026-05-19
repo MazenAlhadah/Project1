@@ -161,9 +161,7 @@ export default function ReadBookPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', padding: '6px 12px', borderRadius: 20 }}>
             <span style={{ color: '#fbbf24', fontSize: 13 }}>⏱️ {formatTime(timeLeft)}</span>
           </div>
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', padding: '6px 12px', borderRadius: 20, fontSize: 12, color: '#f87171' }}>
-            🔒 محمي
-          </div>
+
         </div>
 
         {/* PDF Pages Scroll Container */}
