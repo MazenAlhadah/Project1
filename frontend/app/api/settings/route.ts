@@ -1,4 +1,5 @@
 // @ts-nocheck
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAuth } from '@/lib/auth-helper';
 import db from '@/lib/db/models';
